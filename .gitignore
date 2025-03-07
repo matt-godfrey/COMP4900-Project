@@ -1,0 +1,14 @@
+# object files
+*.o
+*.out
+*.a
+*.so
+*.exe
+
+# folders
+/obj/
+
+
+# misc
+.cproject
+.project
