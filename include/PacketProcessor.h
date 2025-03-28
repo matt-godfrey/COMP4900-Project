@@ -4,16 +4,18 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include "SharedContext.h"
 
 class PacketProcessor {
 private:
-    std::queue<std::string>& packetQueue;
-    std::mutex& queueMutex;
-    std::condition_variable& packetAvailable;
+//    std::queue<std::string>& packetQueue;
+//    std::mutex& queueMutex;
+//    std::condition_variable& packetAvailable;
+	SharedContext& context;
     bool running;
 
 public:
-    PacketProcessor(std::queue<std::string>& q, std::mutex& m, std::condition_variable& cv);
+    PacketProcessor(SharedContext& ctx);
     void processPackets();
 };
 

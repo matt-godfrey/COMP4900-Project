@@ -11,6 +11,7 @@
 #include "RateLimiter.h"
 #include "DriverManager.h"
 #include "NetworkTask.h"
+#include "SharedContext.h"
 
 #include <iostream>
 #include <thread>
@@ -19,14 +20,17 @@
 #include <condition_variable>
 
 int main() {
-    std::queue<std::string> packetQueue;
-    std::mutex queueMutex;
-    std::condition_variable packetAvailable;
+
+	SharedContext sharedContext;
+
+//	std::queue<std::string> packetQueue;
+//    std::mutex queueMutex;
+//    std::condition_variable packetAvailable;
 
     std::cout << "Starting packet processor..." << std::endl;
 
-    PacketReceiver receiver(packetQueue, queueMutex, packetAvailable);
-    PacketProcessor processor(packetQueue, queueMutex, packetAvailable);
+    PacketReceiver receiver(sharedContext);
+    PacketProcessor processor(sharedContext);
 
 //    PacketProcessor processor(&packetQueue, &queueMutex, &packetAvailable);
 

@@ -12,17 +12,19 @@
 #include <mutex>
 #include <condition_variable>
 #include <netinet/in.h>
+#include "SharedContext.h"
 
 class PacketReceiver {
 private:
     int sockfd;
-    std::queue<std::string>& packetQueue; // packet queue in main class; might want to replace with priority queue
-    std::mutex& queueMutex; // mutex for shared queue
-    std::condition_variable& packetAvailable; // shared cond var
+    SharedContext& context;
+//    std::queue<std::string>& packetQueue; // packet queue in main class; might want to replace with priority queue
+//    std::mutex& queueMutex; // mutex for shared queue
+//    std::condition_variable& packetAvailable; // shared cond var
     bool running;
 
 public:
-    PacketReceiver(std::queue<std::string>& q, std::mutex& m, std::condition_variable& cv);
+    PacketReceiver(SharedContext& ctx);
     ~PacketReceiver();
     void capturePackets();
 };

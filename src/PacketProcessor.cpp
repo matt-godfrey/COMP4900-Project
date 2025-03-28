@@ -2,8 +2,8 @@
 #include <iostream>
 #include <thread>
 
-PacketProcessor::PacketProcessor(std::queue<std::string>& q, std::mutex& m, std::condition_variable& cv)
-    : packetQueue(q), queueMutex(m), packetAvailable(cv), running(true) {}
+PacketProcessor::PacketProcessor(SharedContext& ctx)
+    : context(ctx), running(true) {}
 
 //PacketProcessor(std::queue<std::string>* q, std::mutex* m, std::condition_variable* cv) {
 //    packetQueue = q;
@@ -13,17 +13,18 @@ PacketProcessor::PacketProcessor(std::queue<std::string>& q, std::mutex& m, std:
 //}
 
 void PacketProcessor::processPackets() {
+
     while (running) {
     	// lock queue
-        std::unique_lock<std::mutex> lock(queueMutex);
+        std::unique_lock<std::mutex> lock(context.queueMutex);
 //        packetAvailable.wait(lock, [this]() { return !packetQueue.empty(); });
-        while (packetQueue.empty()) {
-            packetAvailable.wait(lock);
+        while (context.lowPriorityQ.empty()) {
+            context.packetAvailable.wait(lock);
         }
 
 
-        std::string packet = packetQueue.front();
-        packetQueue.pop();
+        std::string packet = context.lowPriorityQ.front();
+        context.lowPriorityQ.pop();
         // unlock queue after processing
         lock.unlock();
 
