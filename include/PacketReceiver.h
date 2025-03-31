@@ -27,6 +27,7 @@ public:
     PacketReceiver(SharedContext& ctx);
     ~PacketReceiver();
     void capturePackets();
+    int assignPriority(const std::string& proto, int port);
 };
 
 #endif

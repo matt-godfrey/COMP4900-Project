@@ -9,7 +9,7 @@ LDFLAGS = -lc -lm -lsocket
 EXECUTABLES = PacketProcessor
 
 # Source files
-SOURCES = src/main.cpp src/PacketReceiver.cpp src/PacketQueue.cpp \
+SOURCES = src/main.cpp src/PacketReceiver.cpp src/FlowQueue.cpp \
           src/PacketProcessor.cpp src/RateLimiter.cpp src/DriverManager.cpp src/NetworkTask.cpp
 #SOURCES = src/main.cpp src/PacketReceiver.cpp
 

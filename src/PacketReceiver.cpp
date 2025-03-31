@@ -7,6 +7,7 @@
 
 #include "PacketReceiver.h"
 #include <iostream>
+#include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -30,7 +31,7 @@
 PacketReceiver::PacketReceiver(SharedContext& ctx)
     : context(ctx), running(true) {
 
-	std::cout << "UID: " << getuid() << std::endl;
+	//std::cout << "UID: " << getuid() << std::endl;
 
 	// create UDP socket
 	// AF_INET: uses IPv4
@@ -82,21 +83,69 @@ void PacketReceiver::capturePackets() {
         int len = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr*)&senderAddr, &senderLen);
 //        int len = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, nullptr, nullptr);
         if (len > 0) {
-        	// null terminate
             buffer[len] = '\0';
-            // copy buffer into packet var
-            std::string packet(buffer);
+            std::string raw(buffer);
 
-            // lock queue when storing new packets
-            std::lock_guard<std::mutex> lock(context.queueMutex);
-            context.lowPriorityQ.push(packet);
+            std::string proto, ip, data;
+            int port = 0;
+
+            // parse eaach field in packet
+            std::istringstream stream(raw);
+            std::string token;
+            // getline extracts chars from packet stream, appends to token until '|' found
+            while (std::getline(stream, token, '|')) {
+            	// check if current string val of token is 'SRC'
+                if (token.rfind("SRC=", 0) == 0)
+                	// if so, copy chars starting at pos 4 to the end into 'ip'
+                    ip = token.substr(4);
+                else if (token.rfind("PROTO=", 0) == 0)
+                    proto = token.substr(6);
+                else if (token.rfind("PORT=", 0) == 0)
+                	// convert string to int
+                    port = std::stoi(token.substr(5));
+                else if (token.rfind("DATA=", 0) == 0)
+                    data = token.substr(5);
+            }
+
+            // priority based on protocol/port
+//            int priority = 0;
+//            if (proto == "ICMP" || proto == "ARP") priority = 3;
+//            else if (proto == "UDP" && port == 400) priority = 2;
+//            else if (proto == "TCP" && (port == 80 || port == 443)) priority = 1;
+            int priority = assignPriority(proto, port);
+
+
+            Packet pkt(ip, proto, port, data, priority);
+
+            std::lock_guard<std::mutex> lock(context.contextMutex);
+            if (proto == "ICMP" || proto == "ARP")
+                context.icmp_arpQueue.enqueue(pkt);
+            else if (proto == "UDP" && port == 400)
+                context.udpQueue_400.enqueue(pkt);
+            else if (proto == "UDP")
+                context.udpQueue.enqueue(pkt);
+            else if (proto == "TCP" && port == 80)
+                context.tcpQueue_80.enqueue(pkt);
+            else if (proto == "TCP" && port == 443)
+                context.tcpQueue_443.enqueue(pkt);
+            else
+                context.defaultQueue.enqueue(pkt);  // unknown traffic
+//                std::cout << "Unrecognized packet format: " << raw << std::endl;
             context.packetAvailable.notify_one();
 
             // convert sender IP to readable format
-            std::cout << "Received packet from " << inet_ntoa(senderAddr.sin_addr) << ": " << packet << std::endl;
+            std::cout << "Received packet from " << inet_ntoa(senderAddr.sin_addr) << ": " << raw << std::endl;
         }
     }
 }
+
+int PacketReceiver::assignPriority(const std::string& proto, int port) {
+    if (proto == "ICMP" || proto == "ARP") return 3;
+    if (proto == "UDP" && port == 400) return 2;
+    if (proto == "TCP" && (port == 80 || port == 443)) return 1;
+    return 0;
+}
+
 
 
 //void PacketReceiver::capturePackets() {
