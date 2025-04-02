@@ -14,22 +14,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <cstring> // memset
-
-//PacketReceiver::PacketReceiver() {
-//	// AF_NET: specifies IPv4 protocol family
-//	// SOCK_RAW: raw network protocol access
-//	// IPPROTO_UDP: specifies UDP protocol
-//	// alternatively: socket(AF_INET,SOCK_DGRAM,0) should work
-//	sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
-//	if (sockfd < 0 ) {
-//		perror("Socket creation failed");
-//		exit(EXIT_FAILURE);
-//	}
-//}
+#include <iomanip>
+#include <ctime>
 
 
 PacketReceiver::PacketReceiver(SharedContext& ctx)
     : context(ctx), running(true) {
+
 
 	//std::cout << "UID: " << getuid() << std::endl;
 
@@ -108,14 +99,11 @@ void PacketReceiver::capturePackets() {
             }
 
             // priority based on protocol/port
-//            int priority = 0;
-//            if (proto == "ICMP" || proto == "ARP") priority = 3;
-//            else if (proto == "UDP" && port == 400) priority = 2;
-//            else if (proto == "TCP" && (port == 80 || port == 443)) priority = 1;
             int priority = assignPriority(proto, port);
 
 
             Packet pkt(ip, proto, port, data, priority);
+            pkt.timestamp = std::chrono::system_clock::now();
 
             std::lock_guard<std::mutex> lock(context.contextMutex);
             if (proto == "ICMP" || proto == "ARP")
@@ -131,10 +119,17 @@ void PacketReceiver::capturePackets() {
             else
                 context.defaultQueue.enqueue(pkt);  // unknown traffic
 //                std::cout << "Unrecognized packet format: " << raw << std::endl;
+
+            // let PacketProcessor know packet has arrived
             context.packetAvailable.notify_one();
 
-            // convert sender IP to readable format
-            std::cout << "Received packet from " << inet_ntoa(senderAddr.sin_addr) << ": " << raw << std::endl;
+//            std::time_t timeT = std::chrono::system_clock::to_time_t(pkt.timestamp);
+//
+//            std::cout << "-------------------------------------------------------------------------------------------------------------" << std::endl;
+//            // convert sender IP to readable format
+//            std::cout << "["
+//            		<< std::put_time(std::localtime(&timeT), "%Y-%m-%d %H:%M:%S") << "] "
+//					<< "Received packet from " << inet_ntoa(senderAddr.sin_addr) << ": " << raw << std::endl;
         }
     }
 }
@@ -145,32 +140,6 @@ int PacketReceiver::assignPriority(const std::string& proto, int port) {
     if (proto == "TCP" && (port == 80 || port == 443)) return 1;
     return 0;
 }
-
-
-
-//void PacketReceiver::capturePackets() {
-////	char buffer[2048];
-//	char* buffer = new char[2048];
-//
-//    while (true) {
-//    	// sockfd: socket file descriptor
-//    	// buffer: points to buffer where msg should be stored
-//    	// len: sizeof(buffer); size of buffer
-//    	// flags
-//    	int len = recv(sockfd, buffer, sizeof(buffer), 0);
-//    	if (len > 0) {
-//    		std::cout << "Received packet" << std::endl;
-//    		std::cout << "	size: " << len << "bytes" << std::endl;
-//    	}
-//    	else {
-//    		perror("error capturing packet");
-//    	}
-////        std::cout << "Capturing packet..." << std::endl;
-////        sleep(1);
-//    }
-//
-//    delete[] buffer;
-//}
 
 
 

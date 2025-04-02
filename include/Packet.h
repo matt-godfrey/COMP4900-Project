@@ -19,11 +19,11 @@ struct Packet {
     int priority = 0; // 0 = low, 1 = medium, 2 = med-high, 3 = high
 
     // when the packet was received
-    std::chrono::steady_clock::time_point timestamp;
+    std::chrono::system_clock::time_point timestamp;
 
     Packet() = default;
 
     Packet(const std::string& ip, const std::string& proto, int p, const std::string& d, int pri)
-        : srcIP(ip), protocol(proto), port(p), data(d), priority(pri), timestamp(std::chrono::steady_clock::now()) {}
+        : srcIP(ip), protocol(proto), port(p), data(d), priority(pri), timestamp(std::chrono::system_clock::now()) {}
 };
 #endif /* INCLUDE_PACKET_H_ */

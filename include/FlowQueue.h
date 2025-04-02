@@ -11,19 +11,32 @@ public:
     FlowQueue(int flowPriority = 0, int periodMs = 1000, int budgetLimit = 5);
 
     void enqueue(const Packet& pkt);
+    void enqueueDropped(const Packet& pkt);
     Packet dequeue();
+    Packet peek() const;
+
     bool isEmpty();
+
     void setPriority(int p);
     int getPriority() const;
+    const std::vector<Packet>& getDroppedPackets() const;
+
+    void addDroppedPacket(const Packet& pkt);
+    void printDroppedStats() const;
+
 
     bool canProcess();  // Rate limit check
     void resetBudgetIfNeeded();
+
+
+//    const std::vector<Packet>& getDroppedPackets() const;
 
 private:
     std::vector<Packet> queue;
     std::mutex queueMutex;
     int flowPriority;
 
+    std::vector<Packet> droppedPackets;
 
     int periodMs;
     int budgetLimit;

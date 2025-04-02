@@ -21,21 +21,26 @@ struct SharedContext {
     FlowQueue udpQueue; // default UDP queue; priority low = 0
     FlowQueue defaultQueue; // unknown traffic; prioroty low = 0
 
-
     std::vector<FlowQueue*> allQueues;
+
+//    std::vector<Packet> droppedPackets; // to store dropped packets for possible testing later
 
     std::mutex contextMutex;
     std::condition_variable packetAvailable;
 
-    SharedContext() {
-        allQueues = {
-            &icmp_arpQueue,
-            &udpQueue_400,
-            &tcpQueue_80,
-            &tcpQueue_443,
-            &udpQueue,
-            &defaultQueue
-        };
+//    FlowQueue::FlowQueue(int flowPriority, int periodMs, int budgetLimit)
+//	  udpQueue_400(2, 5000, 5) -> can process max 5 packets per 5 sec time period
+
+    SharedContext()
+        : icmp_arpQueue(3, 5000, 3),
+          udpQueue_400(2, 5000, 5),
+          tcpQueue_80(2, 5000, 2),
+          tcpQueue_443(2, 5000, 2),
+          udpQueue(1, 5000, 2),
+          defaultQueue(0, 5000, 2) {
+
+        allQueues = { &icmp_arpQueue, &udpQueue_400, &tcpQueue_80,
+                      &tcpQueue_443, &udpQueue, &defaultQueue };
     }
 };
 
