@@ -4,6 +4,7 @@
 *.a
 *.so
 *.exe
+PacketProcessor
 
 # folders
 /obj/
