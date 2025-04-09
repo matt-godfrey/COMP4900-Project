@@ -23,8 +23,6 @@ struct SharedContext {
 
     std::vector<FlowQueue*> allQueues;
 
-//    std::vector<Packet> droppedPackets; // to store dropped packets for possible testing later
-
     std::mutex contextMutex;
     std::condition_variable packetAvailable;
 

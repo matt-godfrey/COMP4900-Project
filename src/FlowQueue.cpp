@@ -7,10 +7,6 @@ FlowQueue::FlowQueue(int flowPriority, int periodMs, int budgetLimit)
     : flowPriority(flowPriority), periodMs(periodMs), budgetLimit(budgetLimit),
       budgetRemaining(budgetLimit), lastResetTime(std::chrono::steady_clock::now()) {}
 
-//void FlowQueue::enqueue(const Packet& packet) {
-//    std::lock_guard<std::mutex> lock(queueMutex);
-//    queue.push_back(packet);
-//}
 
 void FlowQueue::enqueue(const Packet& packet) {
     std::lock_guard<std::mutex> lock(queueMutex);
@@ -18,7 +14,6 @@ void FlowQueue::enqueue(const Packet& packet) {
 
     if (budgetRemaining <= 0) {
         std::cout << "[RATE LIMIT] FlowQueue over budget. Dropping packet.\n";
-        // maybe store dropped packets here?
         return;
     }
 
@@ -45,23 +40,6 @@ Packet FlowQueue::dequeue() {
     queue.erase(it);
     return highest;
 }
-
-//Packet FlowQueue::dequeue() {
-//    if (queue.empty()) {
-//        throw std::runtime_error("Dequeue called on empty queue");
-//    }
-//
-//    resetBudgetIfNeeded();
-//    if (budgetRemaining <= 0) {
-//        throw std::runtime_error("Rate limit exceeded");
-//    }
-//
-//    Packet pkt = queue.front();
-////    queue.pop();
-//    queue.erase(queue.begin());
-//    budgetRemaining--;
-//    return pkt;
-//}
 
 Packet FlowQueue::peek() const {
     if (queue.empty()) {

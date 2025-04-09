@@ -32,8 +32,6 @@ int main() {
     PacketReceiver receiver(sharedContext);
     PacketProcessor processor(sharedContext);
 
-//    PacketProcessor processor(&packetQueue, &queueMutex, &packetAvailable);
-
 
     std::thread receiverThread(&PacketReceiver::capturePackets, &receiver);
     std::thread processorThread(&PacketProcessor::processPackets, &processor);

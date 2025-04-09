@@ -52,29 +52,6 @@ void PacketProcessor::processPackets() {
         Packet pkt;
         bool found = false;
 
-//        try {
-//            pkt = selectedQueue->dequeue();
-//            found = true;
-//        } catch (const std::runtime_error& e) {
-//            std::cerr << "[WARN] " << e.what() << std::endl;
-//            continue;
-//        }
-//        try {
-//        	// grab first packet without removing
-//            pkt = selectedQueue->peek();
-//            // if can't process queue, drop packet and store for later
-//            if (!selectedQueue->canProcess()) {
-//                selectedQueue->addDroppedPacket(pkt);
-//                throw std::runtime_error("Rate limit exceeded");
-//            }
-//
-//            pkt = selectedQueue->dequeue();
-//            found = true;
-//
-//        } catch (const std::runtime_error& e) {
-//            std::cerr << "[WARN] " << e.what() << std::endl;
-//            continue;
-//        }
 
         try {
             pkt = selectedQueue->dequeue();
@@ -103,7 +80,3 @@ void PacketProcessor::processPackets() {
 }
 
 
-
-//void PacketProcessor::updatePriority() {
-//	std::cout << "Updating priority.." << std::endl;
-//}

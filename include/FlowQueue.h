@@ -29,8 +29,6 @@ public:
     void resetBudgetIfNeeded();
 
 
-//    const std::vector<Packet>& getDroppedPackets() const;
-
 private:
     std::vector<Packet> queue;
     std::mutex queueMutex;

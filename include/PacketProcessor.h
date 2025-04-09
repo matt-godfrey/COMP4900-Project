@@ -8,9 +8,6 @@
 
 class PacketProcessor {
 private:
-//    std::queue<std::string>& packetQueue;
-//    std::mutex& queueMutex;
-//    std::condition_variable& packetAvailable;
 	SharedContext& context;
     bool running;
 

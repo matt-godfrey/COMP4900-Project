@@ -18,9 +18,6 @@ class PacketReceiver {
 private:
     int sockfd;
     SharedContext& context;
-//    std::queue<std::string>& packetQueue; // packet queue in main class; might want to replace with priority queue
-//    std::mutex& queueMutex; // mutex for shared queue
-//    std::condition_variable& packetAvailable; // shared cond var
     bool running;
 
 public:
